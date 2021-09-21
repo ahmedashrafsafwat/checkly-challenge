@@ -1,0 +1,96 @@
+version: '3.8'
+services:
+  lb:
+    image: haproxy
+    ports:
+        - "8080:8080"
+    volumes:
+        - ./src/config:/usr/local/etc/haproxy
+  rabbitmq3:
+    container_name: "rabbitmq"
+    image: rabbitmq:3.8-management-alpine
+    environment:
+        - RABBITMQ_DEFAULT_USER=myuser
+        - RABBITMQ_DEFAULT_PASS=mypassword
+    ports:
+        - '5672:5672'
+        - '15672:15672'
+    networks:
+        - rabbitmq_nodejs
+  nodeapp1:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: nodeapp1
+    container_name: WebHookContainer
+    ports:
+      - 8081:8081
+    volumes: 
+      - ./src:/src
+      - /node_modules
+    depends_on:
+      - mongodb
+    environment:
+      - PORT=8081
+      - SERVICE_NAME=webHook
+      - DB_HOST=db_mongo
+      - DB_PORT=27017
+      - DB_NAME=checkly
+      - NODE_ENV=development
+      - TOKEN_KEY=thisisatokenkey
+      - RABBITMQ_URL=rabbitmq
+    depends_on:
+      - mongodb
+  nodeapp2:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: nodeapp2
+    container_name: ChecksContainer
+    ports:
+      - 8082:8082
+    volumes: 
+      - ./src:/src
+      - /node_modules
+    depends_on:
+      - mongodb
+    image: nodeapp
+    environment:
+      - PORT=8082
+      - SERVICE_NAME=checks
+      - DB_HOST=db_mongo
+      - DB_PORT=27017
+      - DB_NAME=checkly
+      - NODE_ENV=development
+      - TOKEN_KEY=thisisatokenkey
+    depends_on:
+      - mongodb
+  scheduler:
+    build:
+      context: .
+      dockerfile: ./src/jobs/Dockerfile
+    image: nodeapp2
+    container_name: schedulerContainer
+    ports:
+      - 8083:8083
+    volumes: 
+      - ./src:/src
+      - /node_modules
+    image: nodeapp
+    environment:
+      - PORT=8083
+      - DB_HOST=db_mongo
+      - DB_PORT=27017
+      - DB_NAME=checkly
+      - NODE_ENV=development
+    depends_on:
+      - mongodb
+  mongodb:
+    image: mongo:4
+    command: mongod
+    ports:
+      - "27017:27017"
+    container_name: db_mongo
+networks:
+  rabbitmq_nodejs:
+    driver: bridge

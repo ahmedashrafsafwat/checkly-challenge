@@ -1,0 +1,41 @@
+{
+  "checkType": "string",
+  "name": "string",
+  "frequency": "number",
+  "activated": "boolean",
+  "muted": "boolean",
+  "doubleCheck": "string",
+  "locations": "Array",
+  "script": "string",
+  "alertSettings": {
+    "muted": "boolean",
+    "escalationType": "string",
+    "runBasedEscalation": { "failedRunThreshold": "number" },
+    "timeBasedEscalation": { "minutesFailingThreshold": "number"},
+    "reminders": { "amount": "number", "interval": "number" },
+    "sslCertificates": { "enabled": "booldean", "alertThreshold": "number" }
+  },
+  "useGlobalAlertSettings": "boolean",
+  "alertChannelSubscriptions": [
+    {
+      "activated": "boolean",
+      "alertChannelId": "number",
+      "alertChannel": {
+        "id": "number",
+        "type": "string",
+        "config": { "address": "string" },
+        "accountId": "string",
+        "created_at": "date",
+        "updated_at": "date",
+        "sendRecovery": "boolean",
+        "sendFailure": "boolean",
+        "sendDegraded": "boolean",
+        "sslExpiry": "boolean",
+        "sslExpiryThreshold": "number",
+        "subscriptions": "array"
+      }
+    }
+  ],
+  "environmentVariables": "array",
+  "tags": "array"
+}
